@@ -1,0 +1,9 @@
+BK="\[\033[1;30m\]" #bold black
+BR="\[\033[1;31m\]" #bold red
+BG="\[\033[1;32m\]" #bold green
+BY="\[\033[1;33m\]" #bold yellow
+BB="\[\033[1;34m\]" #bold blue
+BP="\[\033[1;35m\]" #bold purple
+BC="\[\033[1;36m\]" #bold cyan
+BW="\[\033[1;37m\]" #bold white
+R="\[\033[0m\]"     #reset
