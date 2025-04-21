@@ -79,7 +79,7 @@ EOF
     cp -r $BASE_DIR /mnt/install/archlinux && \
 
     echo $ECHO_START'Changing root to /mnt...' && \
-    arch-chroot /mnt bash -c "cd /install && source /install/archlinux/vm-dev/chroot-install.sh"
+    arch-chroot /mnt bash -c "cd /install && source $BASE_DIR/chroot-install.sh"
 } && \
 
 {

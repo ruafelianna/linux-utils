@@ -78,7 +78,7 @@ EOF
         mkdir -p $home_d && \
 
         echo $ECHO_START'Copying bash files...' && \
-        cp ./bashrc.d/{colors,prompt,proxy}.sh $home_d && \
+        cp ./.bashrc.d/{colors,prompt,proxy}.sh $home_d && \
 
         echo $ECHO_START'Uncommenting bashrc corner settings...' && \
         sed -i '15,16 s/# //' $home_d/prompt.sh && \
