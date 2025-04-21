@@ -1,13 +1,13 @@
 export BASE_DIR=/install/archlinux/vm-dev
 
 {
-    eval $(cat ./archlinux/vm-dev/env.sh) && \
+    source ./archlinux/vm-dev/env.sh && \
 
     echo $ECHO_START'Loading locale settings...' && \
-    eval $(cat $BASE_DIR/env-locale.sh)
+    source $BASE_DIR/env-locale.sh
 } && \
 
-./locale.sh && \
+$BASE_DIR/locale.sh && \
 
 {
     echo $ECHO_START'Setting timezone...' && \

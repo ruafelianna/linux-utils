@@ -1,6 +1,6 @@
 {
     echo $ECHO_START'Loading locale settings...' && \
-    eval $(cat $BASE_DIR/env-locale.sh)
+    source $BASE_DIR/env-locale.sh
 } && \
 
 {
@@ -8,7 +8,7 @@
     loadkeys $KEYMAP && \
 
     echo $ECHO_START'Setting font...' && \
-    setfont $FONT && \
+    setfont $FONT
 } && \
 
 {

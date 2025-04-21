@@ -3,16 +3,16 @@ PARTITION_LINUX_SWAP='0657fd6d-a4ab-43c4-84e5-0933c84b4f4f'
 PARTITION_LINUX_EXT4='0fc63daf-8483-4772-8e79-3d69d8477de4'
 
 {
-    eval $(cat ./archlinux/vm-dev/env.sh) && \
+    source ./archlinux/vm-dev/env.sh && \
 
     echo $ECHO_START'Loading locale settings...' && \
-    eval $(cat $BASE_DIR/env-locale.sh)
+    source $BASE_DIR/env-locale.sh && \
 
     echo $ECHO_START'Loading proxy settings...' && \
-    eval $(cat ./.bashrc.d/proxy.sh)
+    source ./.bashrc.d/proxy.sh
 } && \
 
-./locale.sh && \
+$BASE_DIR/locale.sh && \
 
 {
     echo $ECHO_START'Creating partitions...' && \
