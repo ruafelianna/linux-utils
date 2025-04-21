@@ -62,7 +62,7 @@ EOF
     echo $ECHO_START'Installing base system...' && \
     pacstrap -K /mnt base sudo which virtualbox-guest-utils \
         git openssh nano tree refind dhcpcd \
-        terminus-font docker-compose python-pdm
+        terminus-font docker docker-compose python-pdm
 } && \
 
 {
@@ -72,13 +72,14 @@ EOF
 
 {
     echo $ECHO_START'Creating installation dir on mnt...' && \
-    mkdir -p /mnt/install
+    mkdir -p /mnt/install/archlinux
 
     echo $ECHO_START'Copying installation files to mnt...' && \
-    cp ./.bashrc.d ./.nanorc $BASE_DIR /mnt/install && \
+    cp -r ./.bashrc.d ./.nanorc /mnt/install && \
+    cp -r $BASE_DIR /mnt/install/archlinux && \
 
     echo $ECHO_START'Changing root to /mnt...' && \
-    arch-chroot /mnt bash -c "source /install/chroot-install.sh"
+    arch-chroot /mnt bash -c "cd /install && source /install/archlinux/vm-dev/chroot-install.sh"
 } && \
 
 {

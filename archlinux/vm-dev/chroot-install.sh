@@ -5,6 +5,9 @@ export BASE_DIR=/install/archlinux/vm-dev
 
     echo $ECHO_START'Loading locale settings...' && \
     source $BASE_DIR/env-locale.sh
+
+    echo $ECHO_START'Loading chroot settings...' && \
+    source $BASE_DIR/env-chroot.sh
 } && \
 
 $BASE_DIR/locale.sh && \
@@ -69,19 +72,19 @@ EOF
         home_d=$home/.bashrc.d && \
 
         echo $ECHO_START'Copying nano files...' && \
-        cp .nanorc $home && \
+        cp ./.nanorc $home && \
 
         echo $ECHO_START'Creating bashrc folder...' && \
         mkdir -p $home_d && \
 
         echo $ECHO_START'Copying bash files...' && \
-        cp .bashrc.d/colors .bashrc.d/prompt $home_d && \
+        cp ./bashrc.d/{colors,prompt,proxy}.sh $home_d && \
 
         echo $ECHO_START'Uncommenting bashrc corner settings...' && \
-        sed -i '15,16 s/# //' $home_d/prompt && \
+        sed -i '15,16 s/# //' $home_d/prompt.sh && \
 
         echo $ECHO_START'Uncommenting bashrc PS1 var...' && \
-        sed -i "$2 s/# //" $home_d/prompt && \
+        sed -i "$2 s/# //" $home_d/prompt.sh && \
 
         echo $ECHO_START'Changing nanorc directory...' && \
         sed -i '224 s/local\///' $home/.nanorc && \
@@ -90,10 +93,10 @@ EOF
         sed -i "$3 s/# //" $home/.nanorc && \
 
         echo $ECHO_START'Adding prompt sourcing...' && \
-        echo 'source $HOME/.bashrc.d/prompt' >> $home/.bashrc && \
+        echo 'source $HOME/.bashrc.d/prompt.sh' >> $home/.bashrc && \
 
         echo $ECHO_START'Adding proxy sourcing...' && \
-        echo 'source $HOME/.bashrc.d/proxy' >> $home/.bashrc
+        echo 'source $HOME/.bashrc.d/proxy.sh' >> $home/.bashrc
     }
 
     echo $ECHO_START'Adding root customization...' && \
