@@ -1,0 +1,6 @@
+LOCALE=ru_RU
+LOCALES=(en_US $LOCALE)
+KEYMAP=ru
+FONT=ter-v32n
+COUNTRY=Russia
+TZ=Europe/Moscow
