@@ -1,96 +1,119 @@
-PARTITION_EFI='c12a7328-f81f-11d2-ba4b-00a0c93ec93b'
-PARTITION_LINUX_SWAP='0657fd6d-a4ab-43c4-84e5-0933c84b4f4f'
-PARTITION_LINUX_EXT4='0fc63daf-8483-4772-8e79-3d69d8477de4'
+#!/bin/bash
+set -e
 
-{
-    source ./archlinux/vm-dev/env.sh && \
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-    echo $ECHO_START'Loading locale settings...' && \
-    source $BASE_DIR/env-locale.sh && \
+source "$SCRIPT_DIR/common.sh"
 
-    echo $ECHO_START'Loading proxy settings...' && \
-    source ./.bashrc.d/proxy.sh
-} && \
+# ENV
 
-$BASE_DIR/locale.sh && \
+log 'Loading proxy settings...'
+source ./.bashrc.d/proxy.sh
 
-{
-    echo $ECHO_START'Creating partitions...' && \
-    sfdisk /dev/sda << EOF
+log 'Loading locale settings...'
+source $SCRIPT_DIR/env-locale.sh
+
+log 'Loading chroot settings...'
+source $SCRIPT_DIR/env-chroot.sh
+
+# LOCALE
+
+log 'Loading keys...'
+loadkeys $KEYMAP
+
+log 'Setting font...'
+setfont $FONT
+
+for locale in "${LOCALES[@]}"
+do
+    l="$locale.UTF-8 UTF-8"
+
+    log "Uncommenting locale: $l..."
+    sed -i "s/#$l/$l/" /etc/locale.gen
+done
+
+log 'Generating locale...'
+locale-gen
+
+log 'Setting language...'
+echo "LANG=$LOCALE.UTF-8" > /etc/locale.conf
+
+# PARTITIONS
+
+log 'Creating partitions...'
+sfdisk /dev/sda << EOF
 label: gpt
 /dev/sda1: start=2048, size=2097152, type=$PARTITION_EFI
 /dev/sda2: start=2099200, size=8388608, type=$PARTITION_LINUX_SWAP
 /dev/sda3: start=10487808, type=$PARTITION_LINUX_EXT4
 EOF
-} && \
 
-{
-    echo $ECHO_START'Formatting boot partition...' && \
-    mkfs.vfat -n BOOT /dev/sda1 && \
+log 'Formatting boot partition...'
+mkfs.vfat -n BOOT /dev/sda1
 
-    echo $ECHO_START'Formatting swap partition...' && \
-    mkswap -L SWAP /dev/sda2 && \
+log 'Formatting swap partition...'
+mkswap -L SWAP /dev/sda2
 
-    echo $ECHO_START'Formatting root partition...' && \
-    yes | mkfs.ext4 -L ROOT /dev/sda3
-} && \
+log 'Formatting root partition...'
+yes | mkfs.ext4 -L ROOT /dev/sda3
 
-{
-    echo $ECHO_START'Mounting swap...' && \
-    swapon /dev/sda2 && \
+log 'Mounting swap...'
+swapon /dev/sda2
 
-    echo $ECHO_START'Mounting root...' && \
-    mount /dev/sda3 /mnt && \
+log 'Mounting root...'
+mount /dev/sda3 /mnt
 
-    echo $ECHO_START'Mounting boot...' && \
-    mount --mkdir /dev/sda1 /mnt/boot
-} && \
+log 'Mounting boot...'
+mount --mkdir /dev/sda1 /mnt/boot
 
-{
-    echo $ECHO_START'Updating pacman mirror list...' && \
-    reflector --country "$COUNTRY," --save /etc/pacman.d/mirrorlist && \
+# PKGS
 
-    echo $ECHO_START'Updating pacman repository information...' && \
-    pacman -Syy && \
+log 'Updating pacman mirror list...'
+reflector --country "$COUNTRY," --save /etc/pacman.d/mirrorlist
 
-    echo $ECHO_START'Initializing pacman keys...' && \
-    pacman-key --init && \
+log 'Updating pacman repository information...'
+pacman -Syy
 
-    echo $ECHO_START'Populating pacman keys...' && \
-    pacman-key --populate && \
+log 'Initializing pacman keys...'
+pacman-key --init
 
-    echo $ECHO_START'Installing base system...' && \
-    pacstrap -K /mnt base sudo which virtualbox-guest-utils \
-        git openssh nano tree refind dhcpcd \
-        terminus-font docker docker-compose python-pdm
-} && \
+log 'Populating pacman keys...'
+pacman-key --populate
 
-{
-    echo $ECHO_START'Generating stab...' && \
-    genfstab -U /mnt >> /mnt/etc/fstab
-} && \
+log 'Installing base system...'
+pacstrap -K /mnt base sudo which virtualbox-guest-utils \
+    git openssh nano tree refind dhcpcd \
+    terminus-font docker docker-compose python-pdm
 
-{
-    echo $ECHO_START'Creating installation dir on mnt...' && \
-    mkdir -p /mnt/install/archlinux
+# STAB
 
-    echo $ECHO_START'Copying installation files to mnt...' && \
-    cp -r ./.bashrc.d ./.nanorc /mnt/install && \
-    cp -r $BASE_DIR /mnt/install/archlinux && \
+log 'Generating stab...'
+genfstab -U /mnt >> /mnt/etc/fstab
 
-    echo $ECHO_START'Changing root to /mnt...' && \
-    arch-chroot /mnt bash -c "cd /install && source $BASE_DIR/chroot-install.sh"
-} && \
+# CHROOT
 
-{
-  echo $ECHO_START'Removing installation files...' && \
-  rm -r /mnt/install && \
+INSTALL_DIR=/mnt/install
+SCRIPTS_DIR=$INSTALL_DIR/scripts
 
-  echo $ECHO_START'Unmounting root and boot...' && \
-  umount -R /mnt && \
+log 'Creating installation dir on /mnt...'
+mkdir -p $INSTALL_DIR
 
-  echo $ECHO_START'Unmounting swap...' && \
-  swapoff /dev/sda2 && \
+log 'Copying installation files to /mnt...'
+cp -r ./.bashrc.d ./.nanorc $SCRIPT_DIR $INSTALL_DIR
+cp -r $SCRIPT_DIR $SCRIPTS_DIR
 
-  echo 'Installation has completed. Extract installation media and reboot...'
-}
+log 'Changing root to /mnt...'
+arch-chroot /mnt bash -c "cd /install && source ./scripts/chroot-install.sh"
+
+# FINISH
+
+log 'Removing installation files...'
+rm -r $INSTALL_DIR
+
+log 'Unmounting root and boot...'
+umount -R /mnt
+
+log 'Unmounting swap...'
+swapoff /dev/sda2
+
+log 'Installation has completed. Extract installation media and reboot...'
