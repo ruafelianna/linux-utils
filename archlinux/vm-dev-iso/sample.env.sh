@@ -1,0 +1,2 @@
+PUBLIC_KEY=''
+OUT_DIR=''
