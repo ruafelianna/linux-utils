@@ -99,7 +99,7 @@ log 'Creating installation dir on /mnt...'
 mkdir -p $INSTALL_DIR
 
 log 'Copying installation files to /mnt...'
-cp -r ./.bashrc.d ./.nanorc $SCRIPT_DIR $INSTALL_DIR
+cp -r ./.bashrc.d ./.nanorc /root/.ssh/authorized_keys $INSTALL_DIR
 cp -r $SCRIPT_DIR $SCRIPTS_DIR
 
 log 'Changing root to /mnt...'
@@ -117,3 +117,5 @@ log 'Unmounting swap...'
 swapoff /dev/sda2
 
 log 'Installation has completed. Extract installation media and reboot...'
+
+reboot

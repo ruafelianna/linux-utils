@@ -120,22 +120,34 @@ source $HOME/.bashrc.d/proxy.sh
 EOF
 }
 
+root_home='/root'
+user_home="/home/$USER_NAME"
+
 log 'Adding root customization...'
-customize_user '/root' '22' '210,217'
+customize_user "$root_home" '22' '210,217'
 
 log 'Adding administrator customization...'
-customize_user "/home/$USER_NAME" '19' '201,208'
+customize_user "$user_home" '19' '201,208'
 
 log 'Creating root .bash_profile...'
 echo '[[ -f ~/.bashrc ]] && . ~/.bashrc' > /root/.bash_profile
 
+log 'Creating user ssh folder...'
+mkdir -p "$user_home/.ssh"
+
+log 'Copying ssh public key to user ssh folder...'
+cp ./authorized_keys "$user_home/.ssh"
+
 log 'Changing owner of administrator files...'
-chown -R $USER_NAME:$USER_NAME "/home/$USER_NAME"
+chown -R $USER_NAME:$USER_NAME "$user_home"
 
 # DAEMONS
 
 log 'Enabling dhcp daemon...'
 systemctl enable dhcpcd
+
+log 'Enabling ssh daemon...'
+systemctl enable sshd
 
 log 'Enabling docker daemon...'
 systemctl enable docker
