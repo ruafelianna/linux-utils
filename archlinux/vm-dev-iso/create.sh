@@ -10,16 +10,6 @@ log() {
 log "Loading environment..."
 source "$SCRIPT_DIR"/env.sh
 
-if [ -z "$PUBLIC_KEY" ]; then
-    log "Error: PUBLIC_KEY var is not defined in env.sh"
-    exit 1
-fi
-
-if [ -z "$OUT_DIR" ]; then
-    log "Error: OUT_DIR var is not defined in env.sh"
-    exit 1
-fi
-
 log "Installing required packages..."
 sudo pacman -Sy --needed --noconfirm arch-install-scripts awk dosfstools \
     e2fsprogs erofs-utils findutils grub gzip libarchive libisoburn mtools \
