@@ -1,0 +1,5 @@
+#DOTNET_SDK='dotnet-sdk aspnet-runtime'
+#DOTNET_SDK_9='dotnet-sdk-9.0 aspnet-runtime-9.0'
+#DOTNET_SDK_8='dotnet-sdk-8.0 aspnet-runtime-8.0'
+#DOTNET_SDK_7='dotnet-sdk-7.0 aspnet-runtime-7.0'
+#DOTNET_SDK_6='dotnet-sdk-6.0 aspnet-runtime-6.0'

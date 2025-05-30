@@ -1,2 +1,5 @@
 env-chroot.sh
+env-desktop.sh
+env-dotnet.sh
+env-git.sh
 env-locale.sh

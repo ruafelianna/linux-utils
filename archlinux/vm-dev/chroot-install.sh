@@ -7,8 +7,17 @@ source "$SCRIPT_DIR/common.sh"
 
 # ENV
 
+log 'Loading proxy settings...'
+source ./.bashrc.d/proxy.sh
+
 log 'Loading locale settings...'
 source "$SCRIPT_DIR/env-locale.sh"
+
+log 'Loading desktop settings...'
+source "$SCRIPT_DIR/env-desktop.sh"
+
+log 'Loading git settings...'
+source "$SCRIPT_DIR/env-git.sh"
 
 log 'Loading chroot settings...'
 source "$SCRIPT_DIR/env-chroot.sh"
@@ -70,13 +79,31 @@ cat > $docker_dir/daemon.json << EOF
     "no-proxy": "$no_proxy"
 EOF
 
+# YAY
+
+log 'Cloning yay repository'
+git clone https://aur.archlinux.org/yay.git
+
+log 'Installing yay'
+cd yay && makepkg -si
+
+log 'Removing yay repository'
+cd .. && rm -rf yay
+
+# VSCODE
+
+if [ -n "$DESKTOP_ENVIRONMENT" ]; then
+    log "Installing vscode..."
+    yes | yay -S visual-studio-code-bin
+fi
+
 # USERS
 
 log 'Setting root password...'
 echo -n $ROOT_PASSWD | passwd -s
 
 log 'Creating administrator user...'
-useradd -G wheel,docker -s /bin/bash -m $USER_NAME
+useradd -G wheel,docker,vboxsf -s /bin/bash -m $USER_NAME
 
 log 'Setting admiinistrator password...'
 echo -n $USER_PASSWD | passwd -s $USER_NAME
@@ -138,6 +165,32 @@ mkdir -p "$user_home/.ssh"
 log 'Copying ssh public key to user ssh folder...'
 cp ./authorized_keys "$user_home/.ssh"
 
+log 'Creating user ssh config...'
+cat > "$user_home/.ssh/config" << EOF
+ProxyCommand nc -X connect -x $HTTPS_PROXY %h %p
+EOF
+
+log 'Creating user ssh key...'
+ssh-keygen -t ed25519 -C "$USER_NAME" -f $user_home/.ssh/id_ed25519
+
+log 'Adding keep proxy envvars command to sudoers file...'
+cat >> /etc/sudoers << EOF
+Defaults env_keep += "http_proxy https_proxy no_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY"
+EOF
+
+log 'Adding user git config...'
+cat > "$user_home/.gitconfig" << EOF
+[init]
+	defaultBranch = $GIT_DEFAULT_BRANCH
+[core]
+	editor = $GIT_EDITOR
+[user]
+	email = $GIT_USER_EMAIL
+	name = $GIT_USER_NAME
+[http]
+	proxy = $HTTPS_PROXY
+EOF
+
 log 'Changing owner of administrator files...'
 chown -R $USER_NAME:$USER_NAME "$user_home"
 
@@ -151,6 +204,14 @@ systemctl enable sshd
 
 log 'Enabling docker daemon...'
 systemctl enable docker
+
+log 'Enabling vbox daemon...'
+systemctl enable vboxservice
+
+if [ -n "$DISPLAY_MANAGER" ]; then
+    log "Enabling $DISPLAY_MANAGER daemon..."
+    systemctl enable "$DISPLAY_MANAGER"
+fi
 
 # BOOTLOADER
 

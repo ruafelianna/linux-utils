@@ -11,10 +11,16 @@ log 'Loading proxy settings...'
 source ./.bashrc.d/proxy.sh
 
 log 'Loading locale settings...'
-source $SCRIPT_DIR/env-locale.sh
+source "$SCRIPT_DIR/env-locale.sh"
+
+log 'Loading desktop settings...'
+source "$SCRIPT_DIR/env-desktop.sh"
+
+log 'Loading dotnet settings...'
+source "$SCRIPT_DIR/env-dotnet.sh"
 
 log 'Loading chroot settings...'
-source $SCRIPT_DIR/env-chroot.sh
+source "$SCRIPT_DIR/env-chroot.sh"
 
 # LOCALE
 
@@ -81,9 +87,18 @@ log 'Populating pacman keys...'
 pacman-key --populate
 
 log 'Installing base system...'
-pacstrap -K /mnt base sudo which virtualbox-guest-utils \
-    git openssh nano tree refind dhcpcd \
-    terminus-font docker docker-compose python-pdm
+pacstrap -K /mnt base base-devel sudo which virtualbox-guest-utils \
+    git openssh nano tree refind dhcpcd openbsd-netcat \
+    terminus-font docker docker-compose python-pdm \
+    $DOTNET_SDK \
+    $DOTNET_SDK_9 \
+    $DOTNET_SDK_8 \
+    $DOTNET_SDK_7 \
+    $DOTNET_SDK_6 \
+    $DESKTOP_ENVIRONMENT \
+    $DISPLAY_MANAGER \
+    $DESKTOP_FONTS \
+    $DESKTOP_TOOLS
 
 # STAB
 
