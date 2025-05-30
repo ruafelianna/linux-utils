@@ -73,10 +73,13 @@ mkdir -p $docker_dir
 
 log 'Creating docker proxy settings...'
 cat > $docker_dir/daemon.json << EOF
+{
   "proxies": {
     "http-proxy": "$http_proxy",
     "https-proxy": "$https_proxy",
     "no-proxy": "$no_proxy"
+  }
+}
 EOF
 
 # YAY
