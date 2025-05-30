@@ -93,7 +93,10 @@ cd yay && makepkg -si
 log 'Removing yay repository'
 cd .. && rm -rf yay
 
-# VSCODE
+log 'Installing yaycache...'
+yes | yay -S yaycache
+
+# DESKTOP YAY APPS
 
 if [ -n "$DESKTOP_ENVIRONMENT" ]; then
     log "Installing vscode..."
